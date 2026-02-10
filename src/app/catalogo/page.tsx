@@ -1,7 +1,6 @@
-"use client"
-import { useEffect, useState } from 'react'; 
-import CardPelicula from '../Componentes/Productos';
-
+"use client";
+import { useEffect, useState } from "react";
+import CardPelicula from "../Componentes/Productos";
 
 interface Pelicula {
   id: number;
@@ -13,6 +12,7 @@ interface Pelicula {
 
 export default function CatalogoPage() {
   const [rentadas, setRentadas] = useState<number>(0);
+  const [busqueda, setBusqueda] = useState<string>("");
 
   useEffect(() => {
     const estadoInicial = Number(localStorage.getItem("carrito")) || 0;
@@ -20,34 +20,54 @@ export default function CatalogoPage() {
   }, []);
 
   const incrementarRentadas = () => {
-    setRentadas(prev => prev + 1);
+    setRentadas((prev) => prev + 1);
   };
 
   useEffect(() => {
     localStorage.setItem("carrito", rentadas.toString());
   }, [rentadas]);
 
+  
   const catalogo: Pelicula[] = [
-    { id: 1, Nombre: "Los Juegos del Hambre", categoria: "Ciencia ficción", rating: 4.5, foto: "/a.jpg" },
-    { id: 2, Nombre: "Harry Potter", categoria: "Fantasía", rating: 2.3, foto: "/b.jpg" },
-    { id: 3, Nombre: "Inception", categoria: "Suspenso", rating: 4.8, foto: "/c.webp" },
+    { id: 1, Nombre: "Harry Potter", categoria: "fantasia", rating: 4.5, foto: "/a.jpg" },
+    { id: 2, Nombre: "Los Juegos del Hambre", categoria: "ciencia ficción", rating: 2.3, foto: "/b.jpg" },
+    { id: 3, Nombre: "La Familia Del Futuro", categoria: "animación", rating: 4.8, foto: "/c.webp" },
   ];
+
+  
+  const catalogoFiltrado = catalogo.filter((pelicula) =>
+    pelicula.Nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+    pelicula.categoria.toLowerCase().includes(busqueda.toLowerCase())
+  );
 
   return (
     <div className="max-w-7xl mx-auto p-10">
-      <header className="flex justify-between items-end mb-12">
+    
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-6">
         <div>
           <h1 className="text-4xl font-bold mb-2 text-white">Cartelera</h1>
           <p className="text-slate-400">Descubre los estrenos más recientes</p>
         </div>
+
         <div className="bg-slate-900 border border-slate-700 px-6 py-3 rounded-2xl shadow-xl">
           <span className="text-blue-400 font-bold text-xl">🛒 {rentadas}</span>
           <span className="ml-2 text-sm text-slate-300">rentadas</span>
         </div>
       </header>
 
+     
+      <div className="mb-12">
+        <input
+          type="text"
+          placeholder="Buscar película o categoría..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          className="w-full p-4 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {catalogo.map((prod) => (
+        {catalogoFiltrado.map((prod) => (
           <CardPelicula
             key={prod.id}
             Nombre={prod.Nombre}
@@ -57,6 +77,12 @@ export default function CatalogoPage() {
             onRentar={incrementarRentadas}
           />
         ))}
+
+        {catalogoFiltrado.length === 0 && (
+          <p className="text-slate-400 text-center col-span-full">
+            No se encontraron resultados
+          </p>
+        )}
       </div>
     </div>
   );
